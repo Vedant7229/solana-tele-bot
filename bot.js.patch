@@ -1,0 +1,190 @@
+console.log('Received /ping command from', msg.from.username);
+  bot.sendMessage(msg.chat.id, '🏓 heyooo! Bot is alive.us here!|| Use 1 /register to register your Phantom wallet address. 2 /deposit to deposit SOL to your Phantom wallet. 3 /withdraw to withdraw SOL from your Phantom wallet. 4 /balance to check your Phantom wallet balance. 5 /help to get help. 6 /admin to get admin commands.');
+});
+=======
+bot.onText(/\/start/, (msg) => {
+  console.log('Received /start command from', msg.from.username);
+  const chatId = msg.chat.id;
+  const welcomeMessage = `🏓 *Hey there!* I'm alive and ready to help you! 🎉
+
+Here are some commands to get you started:
+1️⃣ /register - Register your Phantom wallet address
+2️⃣ /deposit - Deposit SOL to your Phantom wallet
+3️⃣ /withdraw - Withdraw SOL from your Phantom wallet
+4️⃣ /balance - Check your Phantom wallet balance
+5️⃣ /help - Get help
+6️⃣ /admin - Admin commands (if you have access)
+
+_Type a command to get started!_`;
+
+  bot.sendMessage(chatId, welcomeMessage, { parse_mode: 'Markdown' });
+});
+```
+
+```
+<<<<<<< SEARCH
+bot.onText(/\/register/, (msg) => {
+  console.log('Received /register command from', msg.from.username);
+  const chatId = msg.chat.id;
+  const username = msg.from.username;
+
+  if (!username) {
+    console.log('No username found for user trying to register');
+    return bot.sendMessage(chatId, '❌ You need a Telegram username to register.');
+  }
+
+  const users = loadUsers();
+  if (users[username]) {
+    return bot.sendMessage(chatId, '⚠️ You are already registered.');
+  }
+
+  users[username] = { wallet: null, balance: 0, chatId };
+  saveUsers(users);
+  bot.sendMessage(chatId, '✅ Registered! Now send your Phantom wallet address.');
+});
+=======
+bot.onText(/\/register/, (msg) => {
+  console.log('Received /register command from', msg.from.username);
+  const chatId = msg.chat.id;
+  const username = msg.from.username;
+
+  if (!username) {
+    console.log('No username found for user trying to register');
+    return bot.sendMessage(chatId, '❌ You need a Telegram username to register.');
+  }
+
+  const users = loadUsers();
+  if (users[username]) {
+    return bot.sendMessage(chatId, '⚠️ *You are already registered.*', { parse_mode: 'Markdown' });
+  }
+
+  users[username] = { wallet: null, balance: 0, chatId };
+  saveUsers(users);
+  bot.sendMessage(chatId, '✅ *Registered!* Now send your Phantom wallet address.', { parse_mode: 'Markdown' });
+});
+```
+
+```
+<<<<<<< SEARCH
+// claim
+bot.onText(/\/claim/, async (msg) => {
+  const username = msg.from.username;
+  console.log(`Claim requested by user: ${username}`);
+  const users = loadUsers();
+  const user = users[username];
+  console.log(`User data: ${JSON.stringify(user)}`);
+
+  if (!user || !user.wallet) {
+    console.log('User not registered or wallet not set');
+    return bot.sendMessage(msg.chat.id, '❌ You must register and set a wallet first.');
+  }
+
+  const botPubKey = getBotPublicKey();
+  console.log(`Bot public key: ${botPubKey}`);
+
+  const sigs = await connection.getSignaturesForAddress(
+    new web3.PublicKey(botPubKey), { limit: 100 }
+  );
+  console.log(`Signatures fetched: ${sigs.length}`);
+  console.log('Signatures:', sigs.map(s => s.signature));
+
+  for (const sig of sigs) {
+    const tx = await connection.getTransaction(sig.signature, { commitment: "confirmed" });
+    console.log(`Transaction fetched: ${sig.signature}`);
+
+    if (!tx?.meta?.postBalances || !tx.transaction?.message?.accountKeys) {
+      console.log('Transaction missing postBalances or accountKeys');
+      continue;
+    }
+
+    const sender = tx.transaction.message.accountKeys[0].toBase58();
+    const receiver = tx.transaction.message.accountKeys[1].toBase58();
+    console.log(`Sender: ${sender}, Receiver: ${receiver}`);
+
+    // If user sent funds to bot
+    if (sender === user.wallet && receiver === botPubKey) {
+      const lamportsReceived = tx.meta.postBalances[1] - tx.meta.preBalances[1];
+      const sol = lamportsReceived / web3.LAMPORTS_PER_SOL;
+      console.log(`Lamports received: ${lamportsReceived}, SOL: ${sol}`);
+
+      if (sol > 0) {
+        user.balance += sol;
+        saveUsers(users);
+        return bot.sendMessage(msg.chat.id, `✅ Claimed ${sol.toFixed(4)} SOL!`);
+      }
+    }
+  }
+
+  bot.sendMessage(msg.chat.id, `⚠️ No deposit found to claim.`);
+});
+=======
+// claim
+bot.onText(/\/claim/, async (msg) => {
+  const username = msg.from.username;
+  console.log(`Claim requested by user: ${username}`);
+  const users = loadUsers();
+  const user = users[username];
+  console.log(`User data: ${JSON.stringify(user)}`);
+
+  if (!user || !user.wallet) {
+    console.log('User not registered or wallet not set');
+    return bot.sendMessage(msg.chat.id, '❌ You must register and set a wallet first.');
+  }
+
+  const botPubKey = getBotPublicKey();
+  console.log(`Bot public key: ${botPubKey}`);
+
+  const sigs = await connection.getSignaturesForAddress(
+    new web3.PublicKey(botPubKey), { limit: 100 }
+  );
+  console.log(`Signatures fetched: ${sigs.length}`);
+  console.log('Signatures:', sigs.map(s => s.signature));
+
+  for (const sig of sigs) {
+    const tx = await connection.getTransaction(sig.signature, { commitment: "confirmed" });
+    console.log(`Transaction fetched: ${sig.signature}`);
+
+    if (!tx?.meta?.postBalances || !tx.transaction?.message?.accountKeys) {
+      console.log('Transaction missing postBalances or accountKeys');
+      continue;
+    }
+
+    const sender = tx.transaction.message.accountKeys[0].toBase58();
+    const receiver = tx.transaction.message.accountKeys[1].toBase58();
+    console.log(`Sender: ${sender}, Receiver: ${receiver}`);
+
+    // If user sent funds to bot
+    if (sender === user.wallet && receiver === botPubKey) {
+      const lamportsReceived = tx.meta.postBalances[1] - tx.meta.preBalances[1];
+      const sol = lamportsReceived / web3.LAMPORTS_PER_SOL;
+      console.log(`Lamports received: ${lamportsReceived}, SOL: ${sol}`);
+
+      if (sol > 0) {
+        user.balance += sol;
+        saveUsers(users);
+        return bot.sendMessage(msg.chat.id, `✅ Claimed ${sol.toFixed(4)} SOL!`);
+      }
+    }
+  }
+
+  bot.sendMessage(msg.chat.id, `⚠️ No deposit found to claim.`);
+});
+
+// Added new /menu command
+bot.onText(/\/menu/, (msg) => {
+  console.log('Received /menu command from', msg.from.username);
+  const chatId = msg.chat.id;
+  const menuMessage = `📋 *Main Menu*
+
+Here are the commands you can use:
+🔹 /register - Register your Phantom wallet address
+🔹 /deposit - Deposit SOL to your Phantom wallet
+🔹 /withdraw - Withdraw SOL from your Phantom wallet
+🔹 /balance - Check your Phantom wallet balance
+🔹 /help - Get help
+🔹 /admin - Admin commands (if you have access)
+
+_Type a command to proceed._`;
+
+  bot.sendMessage(chatId, menuMessage, { parse_mode: 'Markdown' });
+});
